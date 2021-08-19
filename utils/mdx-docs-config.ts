@@ -13,6 +13,7 @@ import remarkIncludes from "./remark-includes";
 import remarkLinks from "./remark-links";
 import remarkVariables from "./remark-variables";
 import remarkCodeSnippet from "./remark-code-snippet";
+import remarkImagePath from "./remark-image-path";
 import { staticPath, destinationDir } from "./mdx-paths";
 
 const DEFAULT_RENDERER = `
@@ -52,14 +53,15 @@ const config: MdxConfig = {
     remarkVariables,
     remarkGFM,
     remarkLinks,
-    [
-      remarkCopyLinkedFiles,
-      {
-        destinationDir,
-        staticPath,
-        ignoreFileExtensions: [".md", ".mdx"],
-      },
-    ],
+    remarkImagePath,
+    // [
+    //   remarkCopyLinkedFiles,
+    //   {
+    //     destinationDir,
+    //     staticPath,
+    //     ignoreFileExtensions: [".md", ".mdx"],
+    //   },
+    // ],
   ],
   rehypePlugins: [
     rehypeFixTags,

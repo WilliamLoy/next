@@ -53,7 +53,7 @@ export default function remarkImagePath(): Transformer {
       used.add(node.url);
       // console.log(node);
 
-      const kek = {
+      const srcAttr = {
         type: "mdxJsxAttribute",
         name: "src",
         value: {
@@ -85,7 +85,8 @@ export default function remarkImagePath(): Transformer {
       }
 
       delete node.url;
-      (node.attributes as Array<unknown>).push(kek);
+      (node.attributes as Array<unknown>).push(srcAttr);
+      console.log(node);
 
       // console.log(JSON.stringify(node, null, 3));
 

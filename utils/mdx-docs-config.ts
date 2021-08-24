@@ -5,6 +5,7 @@ import rehypeHighlight from "rehype-highlight";
 import rehypeImages from "./rehype-images";
 import rehypeSlug from "rehype-slug";
 import remarkCopyLinkedFiles from "remark-copy-linked-files";
+import { remarkMdxImages } from "remark-mdx-images";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGFM from "remark-gfm";
 import remarkImportFrontmatter from "./remark-import-frontmatter";
@@ -53,7 +54,7 @@ const config: MdxConfig = {
     remarkVariables,
     remarkGFM,
     remarkLinks,
-    remarkImagePath,
+    remarkMdxImages,
     // [
     //   remarkCopyLinkedFiles,
     //   {

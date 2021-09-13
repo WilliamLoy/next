@@ -1,11 +1,19 @@
-import { Parent, Node } from "unist";
+import { Parent, Node, Literal } from "unist";
+import { Program } from "estree-jsx";
 import { Root, Element, DocType, Comment, Text } from "hast";
 import { Content } from "mdast";
 
 export interface MdxJsxAttribute {
   type: "mdxJsxAttribute";
   name: string;
-  value: boolean | number | string | null | undefined | Array<string | number>;
+  value:
+    | boolean
+    | number
+    | string
+    | null
+    | undefined
+    | Array<string | number>
+    | ProgramEsmNode;
 }
 
 export interface MdxElement extends Parent {
@@ -27,10 +35,19 @@ export interface MdxJsxTextElement extends MdxElement {
   type: "mdxJsxTextElement";
 }
 
-export interface EsmNode extends Node {
+interface ProgramEsmNode extends Node {
+  type: "mdxjsEsm" | "mdxJsxAttributeValueExpression";
+  value?: string;
+  data: {
+    estree?: Program;
+  } & Literal["data"];
+}
+
+export interface PlainEsmNode extends Node {
   type: "mdxjsEsm";
   value: string;
 }
+export type EsmNode = PlainEsmNode | ProgramEsmNode;
 
 export type MdxAnyElement =
   | MdxBlockElement

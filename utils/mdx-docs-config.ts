@@ -53,8 +53,9 @@ const config: MdxConfig = {
     remarkIncludes,
     remarkVariables,
     remarkGFM,
-    remarkLinks,
+    remarkImagePath,
     remarkMdxImages,
+    remarkLinks,
     // [
     //   remarkCopyLinkedFiles,
     //   {

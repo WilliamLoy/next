@@ -27,13 +27,22 @@ export type ImageProps = SharedProps & NextImageProps;
 
 export const Image = ({ align, bordered, caption, ...props }: ImageProps) => {
   const imageProps = useMemo((): NextImageProps => {
-    return {
+    const imageTemp = {
       ...props,
       layout: "intrinsic",
       sizes: "(min-width: 1460px) 900px, 100vw",
-      width: props.width ? parseFloat(props.width as string) : "auto",
-      height: props.height ? parseFloat(props.height as string) : "auto",
     };
+
+    if (!imageTemp?.src?.width || !imageTemp?.src?.height) {
+      imageTemp.width = props.width
+        ? parseFloat(props.width as string)
+        : "auto";
+      imageTemp.height = props.height
+        ? parseFloat(props.height as string)
+        : "auto";
+    }
+
+    return imageTemp;
   }, [props]);
 
   return (

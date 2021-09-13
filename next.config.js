@@ -22,7 +22,6 @@ module.exports = withBundleAnalyzer({
   redirects: async () => getRedirects(),
   images: {
     path: "/_next/image/",
-    disableStaticImages: true,
     domains: ["i.ytimg.com"],
   },
   trailingSlash: true,
@@ -53,11 +52,6 @@ module.exports = withBundleAnalyzer({
       test: /\.svg$/,
       include: [COMPANY_LOGOS_DIRECTORY],
       type: "asset/resource",
-    });
-    config.module.rules.push({
-      test: /\.(png|jpg)$/i,
-      type: "asset/resource",
-      exclude: /node_modules/,
     });
     config.module.rules.push({
       test: /\.(md|mdx)$/,

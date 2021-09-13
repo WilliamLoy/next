@@ -1,150 +1,117 @@
-import value from "md-import-mapping";
+import { Image } from "mdast";
 import { Transformer } from "unified";
 import visit from "unist-util-visit";
 import { MdxastRootNode, MdxastNode } from "./unist-types";
 
-const nodeIsImage = (node: MdxastNode) => node.type === "image";
-let count = 0;
-const used = new Set();
+export interface RemarkImagePathOptions {
+  /**
+   * By default imports are resolved relative to the markdown file. This matches default markdown
+   * behaviour. If this is set to false, this behaviour is removed and URLs are no longer processed.
+   * This allows to import images from `node_modules`. If this is disabled, local images can still
+   * be imported by prepending the path with `./`.
+   *
+   * @default true
+   */
+  resolve?: boolean;
+}
 
-export default function remarkImagePath(): Transformer {
+const urlPattern = /^(https?:)?\//;
+const relativePathPattern = /\.\.?\//;
+
+export default function remarkImagePath(
+  { resolve }: RemarkImagePathOptions = { resolve: true }
+): Transformer {
   return (root: MdxastRootNode) => {
-    visit<MdxastNode>(root, [() => true], (node) => {
-      if (!node.url) return;
-      if (used.has(node.url)) return;
-      const variable = `pic_${count++}`;
-      const pic = {
-        type: "mdxjsEsm",
-        value: `import ${variable} from \"${node.url}\";`,
-        data: {
-          estree: {
-            type: "Program",
-            body: [
-              {
-                type: "ImportDeclaration",
-                specifiers: [
-                  {
-                    type: "ImportSpecifier",
-                    imported: {
-                      type: "Identifier",
-                      name: variable,
-                    },
-                    local: {
-                      type: "Identifier",
-                      name: variable,
-                    },
-                  },
-                ],
-                source: {
-                  type: "Literal",
-                  value: `${node.url}`,
-                  raw: `\"${node.url}\"`,
-                },
-              },
-            ],
-            sourceType: "module",
-          },
-        },
-      };
+    const imports: MdxastNode[] = [];
+    const imported = new Map<string, string>();
 
-      // console.log(pic);
+    visit<Image>(root, "image", (node, index, parent) => {
+      const { alt = null, title } = node;
+      let { url } = node;
+      console.log(url);
 
-      root.children.unshift(pic as MdxastNode);
-      used.add(node.url);
-      // console.log(node);
+      if (urlPattern.test(url)) {
+        return;
+      }
+      if (!relativePathPattern.test(url) && resolve) {
+        url = `./${url}`;
+      }
 
-      const srcAttr = {
-        type: "mdxJsxAttribute",
-        name: "src",
-        value: {
-          type: "mdxJsxAttributeValueExpression",
-          value: variable,
+      let name = imported.get(url);
+
+      if (!name) {
+        name = `__${imported.size}_${url.replace(/\W/g, "_")}__`;
+
+        imports.push({
+          type: "mdxjsEsm",
+          value: `import ${name} from \"${node.url}\";`,
           data: {
             estree: {
               type: "Program",
+              sourceType: "module",
               body: [
                 {
-                  type: "ExpressionStatement",
-                  expression: {
-                    type: "Identifier",
-                    name: variable,
-                    range: [],
+                  type: "ImportDeclaration",
+                  source: {
+                    type: "Literal",
+                    value: url,
+                    raw: JSON.stringify(url),
                   },
-                  range: [],
+                  specifiers: [
+                    {
+                      type: "ImportDefaultSpecifier",
+                      local: { type: "Identifier", name },
+                    },
+                  ],
                 },
               ],
-              sourceType: "module",
-              comments: [],
             },
           },
-        },
-      };
-
-      if (!node.attributes) {
-        node.attributes = [];
+        });
+        imported.set(url, name);
       }
 
-      delete node.url;
-      (node.attributes as Array<unknown>).push(srcAttr);
-      console.log(node);
+      const textElement = {
+        type: "mdxJsxTextElement",
+        name: "img",
+        children: [],
+        attributes: [
+          { type: "mdxJsxAttribute", name: "alt", value: alt },
+          {
+            type: "mdxJsxAttribute",
+            name: "src",
+            value: {
+              type: "mdxJsxAttributeValueExpression",
+              value: name,
+              data: {
+                estree: {
+                  type: "Program",
+                  sourceType: "module",
+                  comments: [],
+                  body: [
+                    {
+                      type: "ExpressionStatement",
+                      expression: { type: "Identifier", name },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      };
 
-      // console.log(JSON.stringify(node, null, 3));
+      if (title) {
+        textElement.attributes.push({
+          type: "mdxJsxAttribute",
+          name: "title",
+          value: title,
+        });
+      }
 
-      // node.url = pic;
-
-      //   url: async (node) => {
-      //     const nUrl = await handleUrl(node.url);
-      //     const asset = transformAsset ? await transformAsset(nUrl) : nUrl;
-
-      //     assets.push(asset);
-      //     return Object.assign(node, {
-      //       url: asset ? asset.url || node.url : node.url,
-      //     });
-      //   },
-      //   link: (...args) => handlers.url(...args),
-      //   definition: (...args) => handlers.url(...args),
-      //   image: (...args) => handlers.url(...args),
-      //   jsx: (...args) => {
-      //     return handlers.html(...args, {
-      //       selectors: [
-      //         ['[poster]', 'poster'],
-      //         ['[src]', 'src'],
-      //         ['[href]', 'href'],
-      //       ],
-      //     });
-      //   },
-      //   mdxBlockElement: async (node) => {
-      //     const { attributes = [] } = node;
-      //     const selectors = ['poster', 'src', 'href', 'value'];
-      //     return Reduce(
-      //       attributes,
-      //       async (node, attr, atIndex) => {
-      //         const { name, value } = attr;
-      //         const { attributes = [] } = node;
-      //         const selector = selectors.find((selector) => {
-      //           return selector === name;
-      //         });
-      //         if (!selector) {
-      //           return node;
-      //         }
-      //         const nUrl = await handleUrl(value);
-      //         const asset = transformAsset ? await transformAsset(nUrl) : nUrl;
-      //         assets.push(asset);
-      //         return Object.assign(node, {
-      //           attributes: attributes.map((item, index) => {
-      //             return index === atIndex
-      //               ? { ...attr, value: asset ? asset.url || value : value }
-      //               : item;
-      //           }),
-      //         });
-      //       },
-      //       node,
-      //     );
-      //   },
-      //   mdxSpanElement: (...args) => handlers.mdxBlockElement(...args),
-      //   mdxJsxFlowElement: (...args) => handlers.mdxBlockElement(...args),
-      //   mdxJsxTextElement: (...args) => handlers.mdxBlockElement(...args),
-      // };
+      parent.children.splice(index, 1, textElement);
     });
+
+    root.children.unshift(...imports);
   };
 }

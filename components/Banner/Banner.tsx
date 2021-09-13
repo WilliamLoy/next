@@ -7,6 +7,7 @@ export type Props = {
   title?: string;
   subtitle?: string;
 } & BoxProps;
+console.log(spacecraftUrl);
 
 export default function Banner({ title, subtitle, ...props }: Props) {
   return (

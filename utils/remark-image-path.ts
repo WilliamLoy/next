@@ -1,7 +1,7 @@
-import { Image } from "mdast";
+import { Image, Link } from "mdast";
 import { Transformer } from "unified";
 import visit from "unist-util-visit";
-import { MdxastRootNode, MdxastNode } from "./unist-types";
+import { MdxastRootNode, MdxastNode, MdxJsxAttribute } from "./unist-types";
 
 export interface RemarkImagePathOptions {
   /**
@@ -17,6 +17,19 @@ export interface RemarkImagePathOptions {
 
 const urlPattern = /^(https?:)?\//;
 const relativePathPattern = /\.\.?\//;
+const imgPattern = /\.(png|jpg|svg|webp|gif|avif|jp2|jpx|jpg2)$/;
+
+const isLocalImage = (href?: string) =>
+  imgPattern.test(href) && !urlPattern.test(href);
+
+const getHref = (nodeAttributes: MdxJsxAttribute[]) =>
+  nodeAttributes.find((attr) => attr.name === "href").value as string;
+
+const isRemarkLinkWilthLocalHref = (node: MdxastNode): boolean => {
+  if (node.name === "a") {
+    return isLocalImage(getHref(node.attributes as MdxJsxAttribute[]));
+  }
+};
 
 export default function remarkImagePath(
   { resolve }: RemarkImagePathOptions = { resolve: true }
@@ -25,10 +38,95 @@ export default function remarkImagePath(
     const imports: MdxastNode[] = [];
     const imported = new Map<string, string>();
 
+    visit<Link>(root, [isRemarkLinkWilthLocalHref], (node, index, parent) => {
+      console.log(node);
+      let href = getHref(node.attributes as MdxJsxAttribute[]);
+      console.log(href);
+
+      if (!relativePathPattern.test(href) && resolve) {
+        href = `./${href}`;
+      }
+
+      let name = imported.get(href);
+
+      if (!name) {
+        name = `__${imported.size}_${href.replace(/\W/g, "_")}__`;
+
+        imports.push({
+          type: "mdxjsEsm",
+          value: `import ${name} from \"${href}\";`,
+          data: {
+            estree: {
+              type: "Program",
+              sourceType: "module",
+              body: [
+                {
+                  type: "ImportDeclaration",
+                  source: {
+                    type: "Literal",
+                    value: href,
+                    raw: JSON.stringify(href),
+                  },
+                  specifiers: [
+                    {
+                      type: "ImportDefaultSpecifier",
+                      local: { type: "Identifier", name },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        });
+        imported.set(href, name);
+      }
+
+      const newLink = {
+        type: "mdxJsxTextElement",
+        name: "a",
+        attributes: [
+          {
+            type: "mdxJsxAttribute",
+            name: "href",
+            value: {
+              type: "mdxJsxAttributeValueExpression",
+              value: `${name}.src`,
+              data: {
+                estree: {
+                  type: "Program",
+                  sourceType: "module",
+                  comments: [],
+                  body: [
+                    {
+                      type: "ExpressionStatement",
+                      expression: {
+                        type: "MemberExpression",
+                        object: {
+                          type: "Identifier",
+                          name,
+                        },
+                        property: {
+                          type: "Identifier",
+                          name: "src",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          { type: "mdxJsxAttribute", name: "download", value: null },
+        ],
+        children: node.children,
+      };
+
+      parent.children.splice(index, 1, newLink);
+    });
+
     visit<Image>(root, "image", (node, index, parent) => {
       const { alt = null, title } = node;
       let { url } = node;
-      console.log(url);
 
       if (urlPattern.test(url)) {
         return;
@@ -44,7 +142,7 @@ export default function remarkImagePath(
 
         imports.push({
           type: "mdxjsEsm",
-          value: `import ${name} from \"${node.url}\";`,
+          value: `import ${name} from \"${url}\";`,
           data: {
             estree: {
               type: "Program",

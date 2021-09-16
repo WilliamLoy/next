@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { ComponentProps } from "react";
 import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import { useRouter } from "next/router";
-import { isHash, isExternalLink, getPath } from "utils/url";
+import { isHash, isExternalLink, getPath, isImage } from "utils/url";
 import { all, variant, transition, StyledSystemProps } from "components/system";
 
 const BaseLink = styled("a")<StyledSystemProps>(
@@ -66,7 +66,8 @@ const Link = ({
   if (
     /\/assets\//.test(href) ||
     passthrough ||
-    (typeof href === "string" && isHash(href))
+    (typeof href === "string" && isHash(href)) ||
+    isImage(href)
   ) {
     return (
       <BaseLink href={href} {...linkProps}>

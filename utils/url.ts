@@ -44,3 +44,9 @@ export const buildCanonicalUrl = (router: NextRouter) => {
 
   return `${host}${path}`;
 };
+
+const imgPattern = /\.(png|jpg|svg|webp|gif|avif|jp2|jpx|jpg2)$/;
+const urlPattern = /^(https?:)/;
+
+export const isImage = (href?: string) =>
+  imgPattern.test(href) && !urlPattern.test(href);

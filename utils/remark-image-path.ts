@@ -2,6 +2,7 @@ import { Image, Link } from "mdast";
 import { Transformer } from "unified";
 import visit from "unist-util-visit";
 import { MdxastRootNode, MdxastNode, MdxJsxAttribute } from "./unist-types";
+import { isImage } from "./url";
 
 export interface RemarkImagePathOptions {
   /**
@@ -15,19 +16,15 @@ export interface RemarkImagePathOptions {
   resolve?: boolean;
 }
 
-const urlPattern = /^(https?:)?\//;
 const relativePathPattern = /\.\.?\//;
-const imgPattern = /\.(png|jpg|svg|webp|gif|avif|jp2|jpx|jpg2)$/;
-
-const isLocalImage = (href?: string) =>
-  imgPattern.test(href) && !urlPattern.test(href);
+const urlPattern = /^(https?:)?\//;
 
 const getHref = (nodeAttributes: MdxJsxAttribute[]) =>
   nodeAttributes.find((attr) => attr.name === "href").value as string;
 
 const isRemarkLinkWilthLocalHref = (node: MdxastNode): boolean => {
   if (node.name === "a") {
-    return isLocalImage(getHref(node.attributes as MdxJsxAttribute[]));
+    return isImage(getHref(node.attributes as MdxJsxAttribute[]));
   }
 };
 

@@ -3,7 +3,12 @@ import { Link } from "mdast";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { isExternalLink, isHash, isPage } from "./url";
-import { MdxastRootNode, MdxastNode, MdxAnyElement } from "./unist-types";
+import {
+  MdxastRootNode,
+  MdxastNode,
+  MdxAnyElement,
+  EsmNode,
+} from "./unist-types";
 
 const mdxNodeTypes = new Set([
   "mdxBlockElement",
@@ -24,14 +29,25 @@ const updateHref = (basename: string, href: string) => {
     : prefix + newHref;
 };
 
-const isLocalHref = (href?: string) =>
-  !!href && !isExternalLink(href) && !isHash(href) && isPage(href);
+const isLocalHref = (href?: string | EsmNode) => {
+  if (!href) {
+    return false;
+  }
+
+  if (typeof href !== "string") {
+    const url = href.value;
+    return !isExternalLink(url) && !isHash(url) && isPage(url);
+  }
+
+  return !isExternalLink(href) && !isHash(href) && isPage(href);
+};
 
 const isMdxComponentWithLocalHref = (node: MdxastNode): boolean => {
   return (
     mdxNodeTypes.has(node.type) &&
     !!(node as MdxAnyElement).attributes.find(
-      ({ name, value }) => name === "href" && isLocalHref(value as string)
+      ({ name, value }) =>
+        name === "href" && isLocalHref(value as string | EsmNode)
     )
   );
 };

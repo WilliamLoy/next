@@ -31,6 +31,47 @@ const isRemarkLinkWilthLocalHref = (node: MdxastNode): boolean => {
   }
 };
 
+const createImageObject = (
+  imports: MdxastNode[],
+  imported: Map<string, string>,
+  url: string,
+  name: string
+) => {
+  if (!name) {
+    name = `__${imported.size}_${url.replace(/\W/g, "_")}__`;
+
+    imports.push({
+      type: "mdxjsEsm",
+      value: `import ${name} from \"${url}\";`,
+      data: {
+        estree: {
+          type: "Program",
+          sourceType: "module",
+          body: [
+            {
+              type: "ImportDeclaration",
+              source: {
+                type: "Literal",
+                value: url,
+                raw: JSON.stringify(url),
+              },
+              specifiers: [
+                {
+                  type: "ImportDefaultSpecifier",
+                  local: { type: "Identifier", name },
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    imported.set(url, name);
+  }
+
+  return name;
+};
+
 export default function remarkImagePath(
   { resolve }: RemarkImagePathOptions = { resolve: true }
 ): Transformer {
@@ -39,9 +80,7 @@ export default function remarkImagePath(
     const imported = new Map<string, string>();
 
     visit<Link>(root, [isRemarkLinkWilthLocalHref], (node, index, parent) => {
-      console.log(node);
       let href = getHref(node.attributes as MdxJsxAttribute[]);
-      console.log(href);
 
       if (!relativePathPattern.test(href) && resolve) {
         href = `./${href}`;
@@ -49,37 +88,7 @@ export default function remarkImagePath(
 
       let name = imported.get(href);
 
-      if (!name) {
-        name = `__${imported.size}_${href.replace(/\W/g, "_")}__`;
-
-        imports.push({
-          type: "mdxjsEsm",
-          value: `import ${name} from \"${href}\";`,
-          data: {
-            estree: {
-              type: "Program",
-              sourceType: "module",
-              body: [
-                {
-                  type: "ImportDeclaration",
-                  source: {
-                    type: "Literal",
-                    value: href,
-                    raw: JSON.stringify(href),
-                  },
-                  specifiers: [
-                    {
-                      type: "ImportDefaultSpecifier",
-                      local: { type: "Identifier", name },
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        });
-        imported.set(href, name);
-      }
+      name = createImageObject(imports, imported, href, name);
 
       const newLink = {
         type: "mdxJsxTextElement",
@@ -137,37 +146,7 @@ export default function remarkImagePath(
 
       let name = imported.get(url);
 
-      if (!name) {
-        name = `__${imported.size}_${url.replace(/\W/g, "_")}__`;
-
-        imports.push({
-          type: "mdxjsEsm",
-          value: `import ${name} from \"${url}\";`,
-          data: {
-            estree: {
-              type: "Program",
-              sourceType: "module",
-              body: [
-                {
-                  type: "ImportDeclaration",
-                  source: {
-                    type: "Literal",
-                    value: url,
-                    raw: JSON.stringify(url),
-                  },
-                  specifiers: [
-                    {
-                      type: "ImportDefaultSpecifier",
-                      local: { type: "Identifier", name },
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        });
-        imported.set(url, name);
-      }
+      name = createImageObject(imports, imported, url, name);
 
       const textElement = {
         type: "mdxJsxTextElement",

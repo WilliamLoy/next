@@ -2,8 +2,9 @@ import { PluggableList } from "unified";
 import rehypeFixTags from "./rehype-fix-tags";
 import rehypeHighlight from "rehype-highlight";
 import remarkFrontmatter from "remark-frontmatter";
-import remarkImportFrontmatter from "./remark-import-frontmatter";
 import remarkCopyLinkedFiles from "remark-copy-linked-files";
+import remarkImportFrontmatter from "./remark-import-frontmatter";
+import remarkImagePath from "./remark-image-path";
 import { staticPath, destinationDir } from "./mdx-paths";
 
 const DEFAULT_RENDERER = `
@@ -28,22 +29,24 @@ interface MdxConfig {
   skipExport?: boolean;
 }
 
-const config: MdxConfig = {
-  remarkPlugins: [
-    remarkFrontmatter,
-    remarkImportFrontmatter,
-    [
-      remarkCopyLinkedFiles,
-      {
-        destinationDir,
-        staticPath,
-        ignoreFileExtensions: [".md", ".mdx"],
-      },
+export default function getConfig(nextImageLoader?: boolean): MdxConfig {
+  return {
+    remarkPlugins: [
+      remarkFrontmatter,
+      remarkImportFrontmatter,
+      nextImageLoader
+        ? remarkImagePath
+        : [
+            remarkCopyLinkedFiles,
+            {
+              destinationDir,
+              staticPath,
+              ignoreFileExtensions: [".md", ".mdx"],
+            },
+          ],
     ],
-  ],
-  rehypePlugins: [rehypeFixTags, rehypeHighlight],
-  skipExport: true,
-  renderer: DEFAULT_RENDERER,
-};
-
-export default config;
+    rehypePlugins: [rehypeFixTags, rehypeHighlight],
+    skipExport: true,
+    renderer: DEFAULT_RENDERER,
+  };
+}

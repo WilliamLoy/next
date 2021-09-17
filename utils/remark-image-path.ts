@@ -1,7 +1,12 @@
 import { Image, Link } from "mdast";
 import { Transformer } from "unified";
 import visit from "unist-util-visit";
-import { MdxastRootNode, MdxastNode, MdxJsxAttribute } from "./unist-types";
+import {
+  MdxastRootNode,
+  MdxastNode,
+  MdxJsxAttribute,
+  MdxJsxFlowElement,
+} from "./unist-types";
 import { isImage } from "./url";
 
 export interface RemarkImagePathOptions {
@@ -18,15 +23,14 @@ export interface RemarkImagePathOptions {
 
 const relativePathPattern = /\.\.?\//;
 const urlPattern = /^(https?:)?\//;
-
-const getHref = (nodeAttributes: MdxJsxAttribute[]) =>
-  nodeAttributes.find((attr) => attr.name === "href").value as string;
-
+const getLocalPath = (nodeAttributes: MdxJsxAttribute[], attrName: string) =>
+  nodeAttributes.find((attr) => attr.name === attrName).value as string;
 const isRemarkLinkWilthLocalHref = (node: MdxastNode): boolean => {
   if (node.name === "a") {
-    return isImage(getHref(node.attributes as MdxJsxAttribute[]));
+    return isImage(getLocalPath(node.attributes as MdxJsxAttribute[], "href"));
   }
 };
+const nodeIsVideoSource = (node: MdxJsxFlowElement) => node.name === "source";
 
 const createImageObject = (
   imports: MdxastNode[],
@@ -77,7 +81,7 @@ export default function remarkImagePath(
     const imported = new Map<string, string>();
 
     visit<Link>(root, [isRemarkLinkWilthLocalHref], (node, index, parent) => {
-      let href = getHref(node.attributes as MdxJsxAttribute[]);
+      let href = getLocalPath(node.attributes as MdxJsxAttribute[], "href");
 
       if (!relativePathPattern.test(href) && resolve) {
         href = `./${href}`;
@@ -185,6 +189,68 @@ export default function remarkImagePath(
 
       parent.children.splice(index, 1, textElement);
     });
+
+    visit<MdxJsxFlowElement>(
+      root,
+      [nodeIsVideoSource],
+      (node, index, parent) => {
+        let videoUrl = getLocalPath(
+          node.attributes as MdxJsxAttribute[],
+          "src"
+        );
+
+        if (!relativePathPattern.test(videoUrl) && resolve) {
+          videoUrl = `./${videoUrl}`;
+        }
+
+        let name = imported.get(videoUrl);
+
+        name = createImageObject(imports, imported, videoUrl, name);
+
+        const newSource = { ...node };
+        newSource.attributes = newSource.attributes.map((elem) => {
+          if (elem.name === "src") {
+            return {
+              type: "mdxJsxAttribute",
+              name: "src",
+              value: {
+                type: "mdxJsxAttributeValueExpression",
+                value: `${name}.src`,
+                data: {
+                  estree: {
+                    type: "Program",
+                    sourceType: "module",
+                    comments: [],
+                    body: [
+                      {
+                        type: "ExpressionStatement",
+                        expression: {
+                          type: "MemberExpression",
+                          object: {
+                            type: "Identifier",
+                            name,
+                          },
+                          property: {
+                            type: "Identifier",
+                            name: "src",
+                          },
+                          computed: false,
+                          optional: false,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            };
+          }
+          return elem;
+        });
+        console.log(JSON.stringify(newSource, null, 3));
+
+        parent.children.splice(index, 1, newSource);
+      }
+    );
 
     root.children.unshift(...imports);
   };

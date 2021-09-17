@@ -44,45 +44,48 @@ interface MdxConfig {
   skipExport?: boolean;
 }
 
-const config: MdxConfig = {
-  remarkPlugins: [
-    remarkFrontmatter,
-    remarkImportFrontmatter,
-    remarkCodeSnippet,
-    remarkImportVariables,
-    remarkIncludes,
-    remarkVariables,
-    remarkGFM,
-    remarkImagePath,
-    remarkMdxImages,
-    remarkLinks,
-    // [
-    //   remarkCopyLinkedFiles,
-    //   {
-    //     destinationDir,
-    //     staticPath,
-    //     ignoreFileExtensions: [".md", ".mdx"],
-    //   },
-    // ],
-  ],
-  rehypePlugins: [
-    rehypeFixTags,
-    rehypeSlug,
-    [
-      rehypeImages,
-      {
-        destinationDir,
-        staticPath,
-      },
+export default function getConfig(nextImageLoader?: boolean): MdxConfig {
+  return {
+    remarkPlugins: [
+      remarkFrontmatter,
+      remarkImportFrontmatter,
+      remarkCodeSnippet,
+      remarkImportVariables,
+      remarkIncludes,
+      remarkVariables,
+      remarkGFM,
+      nextImageLoader
+        ? remarkImagePath
+        : [
+            remarkCopyLinkedFiles,
+            {
+              destinationDir,
+              staticPath,
+              ignoreFileExtensions: [".md", ".mdx"],
+            },
+          ],
+      remarkMdxImages,
+      remarkLinks,
     ],
-    [
-      rehypeHighlight,
-      { aliases: { bash: ["bsh", "systemd", "code"], yaml: ["conf", "toml"] } },
+    rehypePlugins: [
+      rehypeFixTags,
+      rehypeSlug,
+      [
+        rehypeImages,
+        {
+          destinationDir,
+          staticPath,
+        },
+      ],
+      [
+        rehypeHighlight,
+        {
+          aliases: { bash: ["bsh", "systemd", "code"], yaml: ["conf", "toml"] },
+        },
+      ],
+      [rehypeHeaders, { maxLevel: 2 }],
     ],
-    [rehypeHeaders, { maxLevel: 2 }],
-  ],
-  skipExport: true,
-  renderer: DEFAULT_RENDERER,
-};
-
-export default config;
+    skipExport: true,
+    renderer: DEFAULT_RENDERER,
+  };
+}

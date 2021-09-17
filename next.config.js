@@ -3,8 +3,8 @@ const { resolve } = require("path");
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
-const mdxOptions = require("./.build/utils/mdx-config");
-const mdxDocsOptions = require("./.build/utils/mdx-docs-config");
+const mdxOptions = require("./.build/utils/mdx-config").default;
+const mdxDocsOptions = require("./.build/utils/mdx-docs-config").default;
 const {
   getRedirects,
   getLatestVersionRewirites,
@@ -15,6 +15,7 @@ const {
 const DOCS_DIRECTORY = resolve(__dirname, "pages/docs");
 const CONTENT_DIRECTORY = resolve(__dirname, "content");
 const COMPANY_LOGOS_DIRECTORY = resolve(__dirname, "components/Company");
+const USE_NEXT_IMAFE_LOADER = false;
 
 module.exports = withBundleAnalyzer({
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
@@ -22,6 +23,7 @@ module.exports = withBundleAnalyzer({
   redirects: async () => getRedirects(),
   images: {
     path: "/_next/image/",
+    disableStaticImages: !USE_NEXT_IMAFE_LOADER,
     domains: ["i.ytimg.com"],
   },
   trailingSlash: true,
@@ -53,6 +55,13 @@ module.exports = withBundleAnalyzer({
       include: [COMPANY_LOGOS_DIRECTORY],
       type: "asset/resource",
     });
+    if (!USE_NEXT_IMAFE_LOADER) {
+      config.module.rules.push({
+        test: /\.(png|jpg)$/i,
+        type: "asset/resource",
+        exclude: /node_modules/,
+      });
+    }
     config.module.rules.push({
       test: /\.(md|mdx)$/,
       include: [DOCS_DIRECTORY, CONTENT_DIRECTORY],
@@ -60,7 +69,7 @@ module.exports = withBundleAnalyzer({
         options.defaultLoaders.babel,
         {
           loader: "@mdx-js/loader",
-          options: mdxDocsOptions.default,
+          options: mdxDocsOptions(USE_NEXT_IMAFE_LOADER),
         },
       ],
     });
@@ -71,7 +80,7 @@ module.exports = withBundleAnalyzer({
         options.defaultLoaders.babel,
         {
           loader: "@mdx-js/loader",
-          options: mdxOptions.default,
+          options: mdxOptions(USE_NEXT_IMAFE_LOADER),
         },
       ],
     });

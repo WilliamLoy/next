@@ -194,6 +194,7 @@ export default function remarkImagePath(
       root,
       [nodeIsVideoSource],
       (node, index, parent) => {
+        console.log(node);
         let videoUrl = getLocalPath(
           node.attributes as MdxJsxAttribute[],
           "src"
@@ -215,7 +216,7 @@ export default function remarkImagePath(
               name: "src",
               value: {
                 type: "mdxJsxAttributeValueExpression",
-                value: `${name}.src`,
+                value: `${name}`,
                 data: {
                   estree: {
                     type: "Program",
@@ -224,19 +225,7 @@ export default function remarkImagePath(
                     body: [
                       {
                         type: "ExpressionStatement",
-                        expression: {
-                          type: "MemberExpression",
-                          object: {
-                            type: "Identifier",
-                            name,
-                          },
-                          property: {
-                            type: "Identifier",
-                            name: "src",
-                          },
-                          computed: false,
-                          optional: false,
-                        },
+                        expression: { type: "Identifier", name },
                       },
                     ],
                   },

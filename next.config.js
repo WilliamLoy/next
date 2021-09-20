@@ -15,7 +15,7 @@ const {
 const DOCS_DIRECTORY = resolve(__dirname, "pages/docs");
 const CONTENT_DIRECTORY = resolve(__dirname, "content");
 const COMPANY_LOGOS_DIRECTORY = resolve(__dirname, "components/Company");
-const USE_NEXT_IMAFE_LOADER = false;
+const USE_NEXT_IMAGE_LOADER = true;
 
 module.exports = withBundleAnalyzer({
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
@@ -23,7 +23,7 @@ module.exports = withBundleAnalyzer({
   redirects: async () => getRedirects(),
   images: {
     path: "/_next/image/",
-    disableStaticImages: !USE_NEXT_IMAFE_LOADER,
+    disableStaticImages: !USE_NEXT_IMAGE_LOADER,
     domains: ["i.ytimg.com"],
   },
   trailingSlash: true,
@@ -51,11 +51,16 @@ module.exports = withBundleAnalyzer({
       ],
     });
     config.module.rules.push({
+      test: /\.(mp4|webm|ogg|swf|ogv)$/,
+      type: "asset/resource",
+      exclude: /node_modules/,
+    });
+    config.module.rules.push({
       test: /\.svg$/,
       include: [COMPANY_LOGOS_DIRECTORY],
       type: "asset/resource",
     });
-    if (!USE_NEXT_IMAFE_LOADER) {
+    if (!USE_NEXT_IMAGE_LOADER) {
       config.module.rules.push({
         test: /\.(png|jpg)$/i,
         type: "asset/resource",
@@ -69,7 +74,7 @@ module.exports = withBundleAnalyzer({
         options.defaultLoaders.babel,
         {
           loader: "@mdx-js/loader",
-          options: mdxDocsOptions(USE_NEXT_IMAFE_LOADER),
+          options: mdxDocsOptions(USE_NEXT_IMAGE_LOADER),
         },
       ],
     });
@@ -80,7 +85,7 @@ module.exports = withBundleAnalyzer({
         options.defaultLoaders.babel,
         {
           loader: "@mdx-js/loader",
-          options: mdxOptions(USE_NEXT_IMAFE_LOADER),
+          options: mdxOptions(USE_NEXT_IMAGE_LOADER),
         },
       ],
     });

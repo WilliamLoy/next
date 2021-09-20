@@ -31,6 +31,12 @@ const isRemarkLinkWilthLocalHref = (node: MdxastNode): boolean => {
   }
 };
 const nodeIsVideoSource = (node: MdxJsxFlowElement) => node.name === "source";
+const nodeIsPoster = (node: MdxJsxFlowElement) => {
+  if (node.type === "mdxJsxFlowElement" && node.name === "video") {
+    return node.attributes.some((attr) => attr.name === "poster");
+  }
+  return false;
+};
 
 const createImageObject = (
   imports: MdxastNode[],
@@ -194,7 +200,6 @@ export default function remarkImagePath(
       root,
       [nodeIsVideoSource],
       (node, index, parent) => {
-        console.log(node);
         let videoUrl = getLocalPath(
           node.attributes as MdxJsxAttribute[],
           "src"
@@ -235,11 +240,68 @@ export default function remarkImagePath(
           }
           return elem;
         });
-        console.log(JSON.stringify(newSource, null, 3));
-
         parent.children.splice(index, 1, newSource);
       }
     );
+
+    visit<MdxJsxFlowElement>(root, [nodeIsPoster], (node, index, parent) => {
+      let posterSrc = getLocalPath(
+        node.attributes as MdxJsxAttribute[],
+        "poster"
+      );
+
+      if (urlPattern.test(posterSrc)) {
+        return;
+      }
+      if (!relativePathPattern.test(posterSrc) && resolve) {
+        posterSrc = `./${posterSrc}`;
+      }
+
+      let name = imported.get(posterSrc);
+
+      name = createImageObject(imports, imported, posterSrc, name);
+
+      const newSrcPoster = { ...node };
+      newSrcPoster.attributes = newSrcPoster.attributes.map((elem) => {
+        if (elem.name === "poster") {
+          return {
+            type: "mdxJsxAttribute",
+            name: "poster",
+            value: {
+              type: "mdxJsxAttributeValueExpression",
+              value: `${name}.src`,
+              data: {
+                estree: {
+                  type: "Program",
+                  sourceType: "module",
+                  comments: [],
+                  body: [
+                    {
+                      type: "ExpressionStatement",
+                      expression: {
+                        type: "MemberExpression",
+                        object: {
+                          type: "Identifier",
+                          name,
+                        },
+                        property: {
+                          type: "Identifier",
+                          name: "src",
+                        },
+                        computed: false,
+                        optional: false,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          };
+        }
+        return elem;
+      });
+      parent.children.splice(index, 1, newSrcPoster);
+    });
 
     root.children.unshift(...imports);
   };

@@ -38,7 +38,7 @@ const nodeIsPoster = (node: MdxJsxFlowElement) => {
   return false;
 };
 
-const createImageObject = (
+const createImport = (
   imports: MdxastNode[],
   imported: Map<string, string>,
   url: string,
@@ -95,7 +95,7 @@ export default function remarkImagePath(
 
       let name = imported.get(href);
 
-      name = createImageObject(imports, imported, href, name);
+      name = createImport(imports, imported, href, name);
 
       const newLink = {
         type: "mdxJsxTextElement",
@@ -153,7 +153,7 @@ export default function remarkImagePath(
 
       let name = imported.get(url);
 
-      name = createImageObject(imports, imported, url, name);
+      name = createImport(imports, imported, url, name);
 
       const textElement = {
         type: "mdxJsxTextElement",
@@ -211,7 +211,7 @@ export default function remarkImagePath(
 
         let name = imported.get(videoUrl);
 
-        name = createImageObject(imports, imported, videoUrl, name);
+        name = createImport(imports, imported, videoUrl, name);
 
         const newSource = { ...node };
         newSource.attributes = newSource.attributes.map((elem) => {
@@ -259,7 +259,7 @@ export default function remarkImagePath(
 
       let name = imported.get(posterSrc);
 
-      name = createImageObject(imports, imported, posterSrc, name);
+      name = createImport(imports, imported, posterSrc, name);
 
       const newSrcPoster = { ...node };
       newSrcPoster.attributes = newSrcPoster.attributes.map((elem) => {

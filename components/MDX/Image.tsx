@@ -33,7 +33,7 @@ export const Image = ({ align, bordered, caption, ...props }: ImageProps) => {
       sizes: "(min-width: 1460px) 900px, 100vw",
     };
 
-    if (!imageTemp?.src?.width || !imageTemp?.src?.height) {
+    if (typeof imageTemp.src === "string") {
       imageTemp.width = props.width
         ? parseFloat(props.width as string)
         : "auto";
@@ -42,7 +42,7 @@ export const Image = ({ align, bordered, caption, ...props }: ImageProps) => {
         : "auto";
     }
 
-    return imageTemp;
+    return imageTemp as NextImageProps;
   }, [props]);
 
   return (

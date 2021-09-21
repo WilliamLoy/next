@@ -205,6 +205,10 @@ export default function remarkImagePath(
           "src"
         );
 
+        if (urlPattern.test(videoUrl)) {
+          return;
+        }
+
         if (!relativePathPattern.test(videoUrl) && resolve) {
           videoUrl = `./${videoUrl}`;
         }

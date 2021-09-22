@@ -4,9 +4,10 @@ import NextImage, { ImageProps as NextImageProps } from "next/image";
 import Box from "components/Box";
 import Flex from "components/Flex";
 
-type AlignValue = "left" | "center" | "right";
+type PositioningValue = "left" | "center" | "right";
+type MarginValue = number | number[] | string | string[];
 
-const getAlignItems = (align?: AlignValue) => {
+const getAlignItems = (align?: PositioningValue) => {
   switch (align) {
     case "right":
       return "flex-end";
@@ -18,14 +19,39 @@ const getAlignItems = (align?: AlignValue) => {
 };
 
 interface SharedProps {
-  align?: AlignValue;
+  align?: PositioningValue;
   bordered?: boolean;
   caption?: string;
+  yMargin?: MarginValue;
+  xMargin?: MarginValue;
+  imagePositioning?: PositioningValue;
 }
 
 export type ImageProps = SharedProps & NextImageProps;
 
-export const Image = ({ align, bordered, caption, ...props }: ImageProps) => {
+const getImage = (
+  imageProps: NextImageProps,
+  imagePositioning?: PositioningValue
+) => {
+  if (imagePositioning) {
+    return (
+      <Flex justifyContent={imagePositioning} width="100%">
+        <NextImage {...imageProps} />
+      </Flex>
+    );
+  }
+  return <NextImage {...imageProps} />;
+};
+
+export const Image = ({
+  align,
+  bordered,
+  caption,
+  xMargin,
+  yMargin = 3,
+  imagePositioning,
+  ...props
+}: ImageProps) => {
   const imageProps = useMemo((): NextImageProps => {
     return {
       ...props,
@@ -39,7 +65,8 @@ export const Image = ({ align, bordered, caption, ...props }: ImageProps) => {
   return (
     <Flex
       as="figure"
-      my={3}
+      mx={xMargin}
+      my={yMargin}
       flexDirection="column"
       alignItems={getAlignItems(align)}
       css={css({
@@ -53,10 +80,10 @@ export const Image = ({ align, bordered, caption, ...props }: ImageProps) => {
     >
       {bordered ? (
         <Box as="span" boxShadow="0 1px 4px rgba(0, 0, 0, 0.24)">
-          <NextImage {...imageProps} />
+          {getImage(imageProps, imagePositioning)}
         </Box>
       ) : (
-        <NextImage {...imageProps} />
+        getImage(imageProps, imagePositioning)
       )}
       {caption && (
         <Box as="figcaption" mt="2" color="gray" fontStyle="italic">

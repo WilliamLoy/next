@@ -84,9 +84,9 @@ export interface SectionProps {
   children: React.ReactNode;
 }
 
-export const Section = ({ bg, children }: SectionProps) => {
+export const Section = ({ bg, children, ...props }: SectionProps) => {
   return (
-    <Box as="section" {...getBG(bg)}>
+    <Box as="section" {...getBG(bg)} {...props}>
       {children}
     </Box>
   );

@@ -22,6 +22,7 @@ export const Code = ({ children, ...props }: CodeProps) => {
       lineHeight="md"
       {...props}
       whiteSpace="pre"
+      borderRadius="default"
       css={`
         & code {
           font-family: inherit;

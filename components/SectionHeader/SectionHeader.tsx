@@ -4,7 +4,7 @@ import Flex from "components/Flex";
 import wave from "./fixtures/wave.svg";
 import wavelight from "./fixtures/wave-light.png";
 
-type BGColor = "wave" | "white" | "gray" | "wavelight";
+type BGColor = "wave" | "white" | "gray" | "wavelight" | "wave-on-gray";
 
 export interface SectionHeaderProps {
   mode?: string;
@@ -33,6 +33,13 @@ const getBG = (color: BGColor) => {
       return {
         backgroundColor: "linear-gradient(134deg, #ffffff 0%, #f0f2f4 100%)",
         backgroundImage: `url(${wavelight})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        backgroundSize: "100%",
+      };
+    case "wave-on-gray":
+      return {
+        backgroundImage: `url(${wave}), linear-gradient(125deg ,#F0F2F4,#fff)`,
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         backgroundSize: "100%",

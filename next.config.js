@@ -39,7 +39,24 @@ module.exports = withBundleAnalyzer({
       test: /\.svg$/,
       exclude: [/node_modules/, COMPANY_LOGOS_DIRECTORY],
       use: [
-        "@svgr/webpack",
+        {
+          loader: "@svgr/webpack",
+          options: {
+            jsx: {
+              babelConfig: {
+                plugins: [
+                  [
+                    "@svgr/babel-plugin-remove-jsx-attribute",
+                    {
+                      elements: ["svg", "g", "path", "rect"],
+                      attributes: ["xmlns:lucid", "lucid:page-tab-id"],
+                    },
+                  ],
+                ],
+              },
+            },
+          },
+        },
         {
           loader: "file-loader",
           options: {

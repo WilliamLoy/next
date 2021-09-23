@@ -42,6 +42,7 @@ export { default as PageIntro } from "components/PageIntro";
 export { default as ProductBanner } from "components/ProductBanner";
 export { default as PromoPointsBlock } from "components/PromoPointsBlock";
 export { default as PubCertsKeys } from "components/PubCertsKeys";
+export { default as Quote } from "components/Qoute";
 export { default as Registration } from "components/Registration";
 export { default as SignupDescription } from "components/SignupDescription";
 export { default as Section } from "components/Section";

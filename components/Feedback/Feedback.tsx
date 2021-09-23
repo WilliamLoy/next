@@ -59,7 +59,7 @@ export default function Feedback({ reviews, dark }: Props) {
               key={id}
               as="li"
               justifyContent="center"
-              width="100vw"
+              width="100%"
               flexShrink={0}
               px={[3, 0]}
             >
@@ -68,13 +68,15 @@ export default function Feedback({ reviews, dark }: Props) {
           ))}
         </StyledList>
       </div>
-      <Pagination
-        mt={[2, 3]}
-        pages={reviews}
-        selected={active}
-        dark={dark}
-        onClick={setActive}
-      />
+      {reviews.length > 1 && (
+        <Pagination
+          mt={[2, 3]}
+          pages={reviews}
+          selected={active}
+          dark={dark}
+          onClick={setActive}
+        />
+      )}
     </Box>
   );
 }

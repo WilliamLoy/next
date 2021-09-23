@@ -5,11 +5,21 @@ headerBehaviour: floating
 layout: full
 border: none
 hideWave: true
+reviews:
+  - ecmwf
 ---
 
-import { SectionHeader, Section, Box, Link, Flex, TryTeleport } from "components";
+import {
+  SectionHeader,
+  Section,
+  Box,
+  Link,
+  Flex,
+  TryTeleport,
+  Feedback,
+  Quote,
+} from "components";
 import { Centrator } from "components/Layout";
-
 import NextImage from "next/image";
 
 <SectionHeader
@@ -34,6 +44,12 @@ import NextImage from "next/image";
 >
   <Centrator mt={11} mb={8} flexDirection="column">
     The ECMWF needs to safely and securely grant remote shell access to a supercomputer while knowing little about the end users. So when they modernized, European Centre for Medium-Range Weather Forecasting (ECMWF) chose Teleport. On one hand, the ECMWF was founded to provide mission-critical weather services to its members across Europe. On the other, they had to protect computing clusters that forecast models from unwanted access. The catch? A healthy portion of their ecosystem consisted of third party users connecting remotely from a Member State. In other words, the ECMWF had to open their facilities to researchers they did not have explicit contracts with and cannot know in advance. With Teleport, they have enough control to feel comfortable exposing endpoints to anyone its Member States had authorized.
+
+    <Quote mt={6}>
+      <Box as="p" fontWeight="700">About <Link scheme="site" color="dark-purple" href="https://www.ecmwf.int/">ECMWF</Link></Box>
+
+      <Box as="p" fontWeight="400">The European Centre for Medium-Range Weather Forecasting is an independent organization, supported by participating Member States. Hosting one of the largest supercomputing facilities and meteorological data stores in the world, the ECMWF provides invaluable forecasting predictions and reporting. The organization is a key component of Europe’s meteorological infrastructure, working with various national weather services to inform weather conditions for seaports, natural disasters, airports, and space agencies. For nearly 50 years, the ECMWF has remained Europe’s foremost pooling of meteorological resources.</Box>
+    </Quote>
 
     <Box as="h2" mt={11} mb={2} text="header-2" color="dark-purple">
       Preparing for Growth
@@ -64,6 +80,7 @@ import NextImage from "next/image";
     Gating access with these limitations proved to be quite difficult. Paradoxically, upgrading security measures had the potential to weaken the ECMWF. For example, SSH keys are superior to password-based authentication for a  <Link scheme="site" color="dark-purple" href="https://lwn.net/Articles/369703/">variety of reasons</Link>, but issuing SSH keys was never a viable option for the ECMWF. Keys would have to be distributed to a changing user base with little control over what happens to them. Despite being a better method of primary authentication, leaving keys across thousands of local machines meant researchers could access supercomputers even after they’ve left the organization.
 
     Like most Linux shops, especially one that creates and freely distributes software themself, the staff at ECMWF had a healthy appreciation for open-source software. So when they first came across Teleport as a possible fit, they immediately went to the Github repo.
+    <Feedback reviews={meta.reviews} />
 
     <Box as="h2" mt={5} mb={2} text="header-2" color="dark-purple">
       An (Accelerated) Implementation
@@ -127,7 +144,7 @@ import NextImage from "next/image";
             # a user can only connect to a node marked with all labels:
             'environment': '*'
     ```
-    
+
     <Box as="p" my={3}>
       Whereas Alice’s may look like:
     </Box>
@@ -190,6 +207,7 @@ import NextImage from "next/image";
       <Link scheme="site" color="dark-purple" href="https://confluence.ecmwf.int/display/UDOC/Teleport+SSH+Access">Source</Link>
     </Box>
     </Flex>
+
   </Centrator>
 </Section>
 <TryTeleport />

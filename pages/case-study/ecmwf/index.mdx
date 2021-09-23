@@ -7,6 +7,8 @@ border: none
 hideWave: true
 reviews:
   - ecmwf
+accessLink:
+  { href: "../..", text: "Learn more", variant: "secondary", shape: "outline" }
 ---
 
 import {
@@ -210,4 +212,20 @@ import NextImage from "next/image";
 
   </Centrator>
 </Section>
+<SectionHeader
+  mode={meta.layout}
+  subtitle="Teleport is part of the"
+  title="Access Plane"
+  description="Teleport provides an Access Plane that consolidates access controls and auditing across all environments - infrastructure, applications and data."
+  bg="wave"
+  link={meta.accessLink}
+>
+  <NextImage
+    src="./assets/access-plane-all.png"
+    width={588}
+    height={356}
+    layout="intrinsic"
+    alt="Teleport Access Plane"
+  />
+</SectionHeader>
 <TryTeleport />

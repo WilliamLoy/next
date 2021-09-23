@@ -44,7 +44,7 @@ import NextImage from "next/image";
   backgroundPosition="top left"
   backgroundSize="auto"
 >
-  <Centrator mt={11} mb={8} flexDirection="column">
+  <Centrator mt={[7, 11]} mb={[0, 8]} flexDirection="column">
     The ECMWF needs to safely and securely grant remote shell access to a supercomputer while knowing little about the end users. So when they modernized, European Centre for Medium-Range Weather Forecasting (ECMWF) chose Teleport. On one hand, the ECMWF was founded to provide mission-critical weather services to its members across Europe. On the other, they had to protect computing clusters that forecast models from unwanted access. The catch? A healthy portion of their ecosystem consisted of third party users connecting remotely from a Member State. In other words, the ECMWF had to open their facilities to researchers they did not have explicit contracts with and cannot know in advance. With Teleport, they have enough control to feel comfortable exposing endpoints to anyone its Member States had authorized.
 
     <Quote mt={6}>
@@ -53,7 +53,7 @@ import NextImage from "next/image";
       <Box as="p" fontWeight="400">The European Centre for Medium-Range Weather Forecasting is an independent organization, supported by participating Member States. Hosting one of the largest supercomputing facilities and meteorological data stores in the world, the ECMWF provides invaluable forecasting predictions and reporting. The organization is a key component of Europe’s meteorological infrastructure, working with various national weather services to inform weather conditions for seaports, natural disasters, airports, and space agencies. For nearly 50 years, the ECMWF has remained Europe’s foremost pooling of meteorological resources.</Box>
     </Quote>
 
-    <Box as="h2" mt={11} mb={2} text="header-2" color="dark-purple">
+    <Box as="h2" mt={[7, 11]} mb={2} text="header-2" color="dark-purple">
       Preparing for Growth
     </Box>
     The ECMWF’s 10-year goals, set in 2016, had ambitious mandates; one of which required moving their datacenter from Reading, England to Bologna, Italy. The relocation was a massive undertaking, requiring multinational collaboration to move and construct a state-of-the-art data center in a 9,000 square meter facility. The infrastructure team at the ECMWF would use this opportunity to refurbish outdated services, one of which included a remote access service for members that needed to connect a shell to ECMWF’s computing powerhouse.

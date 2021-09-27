@@ -1,4 +1,4 @@
-import Box from "components/Box";
+import Box, { BoxProps } from "components/Box";
 import squaresBG from "./assets/squares.svg";
 import waveGrayBG from "./assets/waveGray.svg";
 import waveWhiteBG from "./assets/waveWhite.svg";
@@ -84,7 +84,11 @@ export interface SectionProps {
   children: React.ReactNode;
 }
 
-export const Section = ({ bg, children, ...props }: SectionProps) => {
+export const Section = ({
+  bg,
+  children,
+  ...props
+}: SectionProps & BoxProps) => {
   return (
     <Box as="section" {...getBG(bg)} {...props}>
       {children}
